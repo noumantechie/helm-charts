@@ -1,0 +1,34 @@
+name: Publish Helm Chart to Harbor
+
+on:
+  push:
+    branches:
+      - main   # jab bhi main branch par push hoga, ye action chalega
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: v3.12.0   # Helm version
+
+      - name: Package Helm Chart
+        run: |
+          helm dependency update ./my-app
+          helm package ./my-app -d .
+
+      - name: Push to Harbor
+        env:
+          HARBOR_URL: ${{ secrets.HARBOR_URL }}
+          HARBOR_PROJECT: ${{ secrets.HARBOR_PROJECT }}
+          HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+          HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+        run: |
+          helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
+          helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
