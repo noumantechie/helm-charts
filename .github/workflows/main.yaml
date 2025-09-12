@@ -23,6 +23,16 @@ jobs:
           helm dependency update ./my-app
           helm package ./my-app -d .
 
+      # - name: Push to Harbor
+      #   env:
+      #     HARBOR_URL: ${{ secrets.HARBOR_URL }}
+      #     HARBOR_PROJECT: ${{ secrets.HARBOR_PROJECT }}
+      #     HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
+      #     HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
+      #   run: |
+      #     helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
+      #     helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
+      
       - name: Push to Harbor
         env:
           HARBOR_URL: ${{ secrets.HARBOR_URL }}
@@ -30,5 +40,5 @@ jobs:
           HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
           HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
         run: |
-          helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
+          echo $HARBOR_PASSWORD | helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password-stdin
           helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
