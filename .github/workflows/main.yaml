@@ -17,6 +17,15 @@ jobs:
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0   # Helm version
+      
+      # ...existing code...
+      - name: Update appVersion and version in Chart.yaml
+        run: |
+          NEW_APP_VERSION=$(git rev-parse --short HEAD)
+          NEW_CHART_VERSION=$(date +'%Y.%m.%d.%H%M%S')
+          sed -i "s/^appVersion: .*/appVersion: \"$NEW_APP_VERSION\"/" ./my-app/Chart.yaml
+          sed -i "s/^version: .*/version: \"$NEW_CHART_VERSION\"/" ./my-app/Chart.yaml
+# ...existing code...
 
       - name: Package Helm Chart
         run: |
@@ -32,10 +41,11 @@ jobs:
       #   run: |
       #     helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
       #     helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
-      - name: Update appVersion in Chart.yaml
-        run: |
-          NEW_VERSION=$(git rev-parse --short HEAD)
-          sed -i "s/^appVersion: .*/appVersion: \"$NEW_VERSION\"/" ./my-app/Chart.yaml
+      # - name: Update appVersion in Chart.yaml
+      #   run: |
+      #     NEW_VERSION=$(git rev-parse --short HEAD)
+      #     sed -i "s/^appVersion: .*/appVersion: \"$NEW_VERSION\"/" ./my-app/Chart.yaml
+        
 
       
       - name: Push to Harbor
@@ -47,3 +57,4 @@ jobs:
         run: |
           echo $HARBOR_PASSWORD | helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password-stdin
           helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
+      
