@@ -32,6 +32,11 @@ jobs:
       #   run: |
       #     helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
       #     helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
+      - name: Update appVersion in Chart.yaml
+        run: |
+          NEW_VERSION=$(git rev-parse --short HEAD)
+          sed -i "s/^appVersion: .*/appVersion: \"$NEW_VERSION\"/" ./my-app/Chart.yaml
+
       
       - name: Push to Harbor
         env:
