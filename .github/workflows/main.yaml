@@ -3,7 +3,7 @@ name: Publish Helm Chart to Harbor
 on:
   push:
     branches:
-      - main   # jab bhi main branch par push hoga, ye action chalega
+      - main   # runs whenever code is pushed to main branch
 
 jobs:
   publish:
@@ -12,26 +12,31 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0   # needed for commit count
+
+      - name: Install yq v4
+        run: |
+          sudo wget -qO /usr/local/bin/yq https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+          sudo chmod +x /usr/local/bin/yq
+          yq --version
 
       - name: Setup Helm
         uses: azure/setup-helm@v3
         with:
           version: v3.12.0   # Helm version
-      
 
-
-
-      #
-
-# ...existing code...
       - name: Update appVersion and version in Chart.yaml
         run: |
           NEW_APP_VERSION=$(git rev-parse --short HEAD)
           COMMIT_COUNT=$(git rev-list --count HEAD)
           NEW_CHART_VERSION="1.0.${COMMIT_COUNT}"
-          yq -i '.appVersion = strenv(NEW_APP_VERSION)' ./my-app/Chart.yaml
-          yq -i '.version = strenv(NEW_CHART_VERSION)' ./my-app/Chart.yaml
-# ...existing code...
+
+          export NEW_APP_VERSION
+          export NEW_CHART_VERSION
+
+          yq e -i '.appVersion = env(NEW_APP_VERSION)' ./my-app/Chart.yaml
+          yq e -i '.version = env(NEW_CHART_VERSION)' ./my-app/Chart.yaml
 
       - name: Show updated Chart.yaml
         run: cat ./my-app/Chart.yaml
@@ -40,9 +45,7 @@ jobs:
         run: |
           helm dependency update ./my-app
           helm package ./my-app -d .
-        
 
-      
       - name: Push to Harbor
         env:
           HARBOR_URL: ${{ secrets.HARBOR_URL }}
@@ -52,4 +55,3 @@ jobs:
         run: |
           echo $HARBOR_PASSWORD | helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password-stdin
           helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
-      
