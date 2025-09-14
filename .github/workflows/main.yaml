@@ -20,6 +20,8 @@ jobs:
       
 
 
+
+      #
       # ...existing code...
       - name: Update appVersion and version in Chart.yaml
         run: |
@@ -28,27 +30,14 @@ jobs:
           NEW_CHART_VERSION="1.0.${COMMIT_COUNT}"
           sed -i "s/^appVersion: .*/appVersion: \"$NEW_APP_VERSION\"/" ./my-app/Chart.yaml
           sed -i "s/^version: .*/version: \"$NEW_CHART_VERSION\"/" ./my-app/Chart.yaml
-# ...existing code...
 
+      - name: Show updated Chart.yaml
+        run: cat ./my-app/Chart.yaml
 
       - name: Package Helm Chart
         run: |
           helm dependency update ./my-app
           helm package ./my-app -d .
-
-      # - name: Push to Harbor
-      #   env:
-      #     HARBOR_URL: ${{ secrets.HARBOR_URL }}
-      #     HARBOR_PROJECT: ${{ secrets.HARBOR_PROJECT }}
-      #     HARBOR_USERNAME: ${{ secrets.HARBOR_USERNAME }}
-      #     HARBOR_PASSWORD: ${{ secrets.HARBOR_PASSWORD }}
-      #   run: |
-      #     helm registry login $HARBOR_URL --username $HARBOR_USERNAME --password $HARBOR_PASSWORD
-      #     helm push *.tgz oci://$HARBOR_URL/$HARBOR_PROJECT
-      # - name: Update appVersion in Chart.yaml
-      #   run: |
-      #     NEW_VERSION=$(git rev-parse --short HEAD)
-      #     sed -i "s/^appVersion: .*/appVersion: \"$NEW_VERSION\"/" ./my-app/Chart.yaml
         
 
       
