@@ -22,14 +22,15 @@ jobs:
 
 
       #
-      # ...existing code...
+
       - name: Update appVersion and version in Chart.yaml
         run: |
           NEW_APP_VERSION=$(git rev-parse --short HEAD)
           COMMIT_COUNT=$(git rev-list --count HEAD)
           NEW_CHART_VERSION="1.0.${COMMIT_COUNT}"
-          sed -i "s/^appVersion: .*/appVersion: \"$NEW_APP_VERSION\"/" ./my-app/Chart.yaml
-          sed -i "s/^version: .*/version: \"$NEW_CHART_VERSION\"/" ./my-app/Chart.yaml
+          sed -i 's/^appVersion:.*$/appVersion: "'$NEW_APP_VERSION'"/' ./my-app/Chart.yaml
+          sed -i 's/^version:.*$/version: "'$NEW_CHART_VERSION'"/' ./my-app/Chart.yaml
+# ...existing code...
 
       - name: Show updated Chart.yaml
         run: cat ./my-app/Chart.yaml
