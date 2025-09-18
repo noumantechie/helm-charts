@@ -1,14 +1,17 @@
-name: Publish Helm Chart to Harbor
+name: Publish Helm Chart to Harbor # Define when and what happend automatically.
 
-on:
+on: # An event is what triggers the workflow.
   push:
     branches:
       - main   # runs whenever code is pushed to main branch
 
-jobs:
-  publish:
-    runs-on: ubuntu-latest
+  
 
+jobs: # A job is a set of steps that run together on the same machine.
+  publish:
+    runs-on: ubuntu-latest # A runner is the machine where your job runs.
+
+# Inside a job , there are steps. Each step runs one command or uses an action.
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
